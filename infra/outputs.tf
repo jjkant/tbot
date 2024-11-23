@@ -18,4 +18,10 @@ output "ec2_public_ip" {
   value = aws_instance.twitch_bot_ec2.public_ip
 }
 
+output "frontend_website_url" {
+  value = aws_s3_bucket.frontend_bucket.website_endpoint
+}
 
+output "lambda_function_url" {
+  value = aws_lambda_function_url.oauth_handler_url.function_url
+}

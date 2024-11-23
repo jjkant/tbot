@@ -214,13 +214,40 @@ resource "random_id" "bucket_suffix" {
 # 7. S3 Bucket for Frontend
 resource "aws_s3_bucket" "frontend_bucket" {
   bucket = "${var.project_name}-frontend-${random_id.bucket_suffix.hex}"
-  acl    = "public-read"
 
   tags = {
     Name        = "${var.project_name}-frontend"
     Environment = var.environment
   }
 }
+
+resource "aws_s3_bucket_ownership_controls" "frontend_bucket_ownership_controls" {
+  bucket = aws_s3_bucket.frontend_bucket.id
+  rule {
+    object_ownership = "BucketOwnerPreferred"
+  }
+}
+
+
+resource "aws_s3_bucket_public_access_block" "frontend_bucket_public_access_block" {
+  bucket = aws_s3_bucket.frontend_bucket.id
+
+  block_public_acls       = false
+  block_public_policy     = false
+  ignore_public_acls      = false
+  restrict_public_buckets = false
+}
+
+resource "aws_s3_bucket_acl" "frontend_bucket_acl" {
+  depends_on = [
+    aws_s3_bucket_ownership_controls.frontend_bucket_ownership_controls,
+    aws_s3_bucket_public_access_block.frontend_bucket_public_access_block,
+  ]
+
+  bucket = aws_s3_bucket.frontend_bucket.id
+  acl    = "public-read"
+}
+
 
 # S3 Bucket Website Configuration
 resource "aws_s3_bucket_website_configuration" "frontend_website" {
@@ -249,15 +276,41 @@ resource "aws_s3_bucket_policy" "frontend_bucket_policy" {
   })
 }
 
-# 8. Lambda Function
+
+# 8. S3 Bucket Objects for Frontend
+
+# Upload index.html
+resource "aws_s3_object" "index_html" {
+  bucket       = aws_s3_bucket.frontend_bucket.id
+  key          = "index.html"
+  source       = "${path.module}/frontend/index.html"
+  content_type = "text/html"
+}
+
+# Upload auth_callback.html with templating
+resource "aws_s3_object" "auth_callback_html" {
+  bucket       = aws_s3_bucket.frontend_bucket.id
+  key          = "auth_callback.html"
+  content      = templatefile("${path.module}/frontend/auth_callback.html", {
+    LAMBDA_FUNCTION_URL = aws_lambda_function_url.oauth_handler_url.function_url
+  })
+  content_type = "text/html"
+}
+
+# 9. Lambda Function
 resource "aws_lambda_function" "oauth_handler" {
   filename         = "lambda_package.zip"  # The deployment package
   function_name    = "${var.project_name}_oauth_handler"
   role             = aws_iam_role.lambda_role.arn
   handler          = "lambda_function.lambda_handler"
-  runtime          = "python3.9"
+  runtime          = "python3.11"
   timeout          = 10
   publish          = true
+
+  layers = [
+    "arn:aws:lambda:eu-west-1:770693421928:layer:Klayers-p311-pymongo:11",
+    "arn:aws:lambda:eu-west-1:770693421928:layer:Klayers-p311-requests:13"
+  ]
 
   environment {
     variables = {
@@ -266,6 +319,7 @@ resource "aws_lambda_function" "oauth_handler" {
     }
   }
 }
+
 
 # Lambda Function URL
 resource "aws_lambda_function_url" "oauth_handler_url" {
@@ -278,24 +332,4 @@ resource "aws_lambda_function_url" "oauth_handler_url" {
   }
 }
 
-# 9. S3 Bucket Objects for Frontend
 
-# Upload index.html
-resource "aws_s3_object" "index_html" {
-  bucket       = aws_s3_bucket.frontend_bucket.id
-  key          = "index.html"
-  source       = "${path.module}/frontend/index.html"
-  content_type = "text/html"
-  acl          = "public-read"
-}
-
-# Upload auth_callback.html with templating
-resource "aws_s3_object" "auth_callback_html" {
-  bucket       = aws_s3_bucket.frontend_bucket.id
-  key          = "auth_callback.html"
-  content      = templatefile("${path.module}/frontend/auth_callback.html", {
-    LAMBDA_FUNCTION_URL = aws_lambda_function_url.oauth_handler_url.function_url
-  })
-  content_type = "text/html"
-  acl          = "public-read"
-}

@@ -27,7 +27,7 @@
       }
 
       // Lambda Function URL provided by Terraform templating
-      const lambdaFunctionUrl = "{{LAMBDA_FUNCTION_URL}}";
+      const lambdaFunctionUrl = "${LAMBDA_FUNCTION_URL}";
 
       try {
         const response = await fetch(lambdaFunctionUrl, {
