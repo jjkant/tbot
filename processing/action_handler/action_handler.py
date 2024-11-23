@@ -12,10 +12,10 @@ def get_parameters():
     params = ssm.get_parameters(
         Names=[
             '/botaws/output_queue_url',
-            '/twitch/client_id',
-            '/botwitch/client_secret',
-            '/twitch/bot_refresh_token',
-            '/botwitch/channel_id'
+            '/bottwitch/client_id',
+            '/bottwitch/client_secret',
+            '/bottwitch/bot_refresh_token',
+            '/bottwitch/channel_id'
         ],
         WithDecryption=True
     )
@@ -26,10 +26,10 @@ params = get_parameters()
 sqs = boto3.client('sqs', region_name='eu-west-1')
 output_queue_url = params['/botaws/output_queue_url']
 
-client_id = params['/twitch/client_id']
-client_secret = params['/botwitch/client_secret']
-channel_id = params['/botwitch/channel_id']
-bot_refresh_token = params['/twitch/bot_refresh_token']
+client_id = params['/bottwitch/client_id']
+client_secret = params['/bottwitch/client_secret']
+channel_id = params['/bottwitch/channel_id']
+bot_refresh_token = params['/bottwitch/bot_refresh_token']
 
 # Refresh the access token
 new_tokens = refresh_access_token(
@@ -44,7 +44,7 @@ bot_refresh_token = new_tokens['refresh_token']
 # Update the refresh token in SSM Parameter Store
 ssm = boto3.client('ssm', region_name='eu-west-1')
 ssm.put_parameter(
-    Name='/twitch/bot_refresh_token',
+    Name='/bottwitch/bot_refresh_token',
     Value=bot_refresh_token,
     Type='SecureString',
     Overwrite=True

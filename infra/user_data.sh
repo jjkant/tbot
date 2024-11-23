@@ -20,7 +20,7 @@ cd /home/ubuntu/twitch_bot
 git clone https://github.com/jjkant/tbot.git . || { echo "Git clone failed"; exit 1; }
 
 # Navigate to the processing folder
-cd tbot/processing
+cd processing
 
 # Run Docker Compose
 docker-compose up -d || { echo "Docker Compose failed"; exit 1; }

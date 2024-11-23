@@ -10,9 +10,9 @@ def get_parameters():
     ssm = boto3.client('ssm', region_name='eu-west-1')
     params = ssm.get_parameters(
         Names=[
-            '/twitch/bot_oauth_token',
-            '/twitch/client_id',
-            '/botwitch/channel_name',
+            '/bottwitch/bot_oauth_token',
+            '/bottwitch/client_id',
+            '/bottwitch/channel_name',
             '/botaws/input_queue_url'
         ],
         WithDecryption=True
@@ -28,11 +28,11 @@ class TwitchBot(commands.Bot):
 
     def __init__(self):
         super().__init__(
-            token=params['/twitch/bot_oauth_token'],
-            client_id=params['/twitch/client_id'],
+            token=params['/bottwitch/bot_oauth_token'],
+            client_id=params['/bottwitch/client_id'],
             nick='YourBotNick',
             prefix='!',
-            initial_channels=[params['/botwitch/channel_name']]
+            initial_channels=[params['/bottwitch/channel_name']]
         )
 
     async def event_ready(self):

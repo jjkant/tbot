@@ -6,43 +6,43 @@ provider "aws" {
 }
 
 resource "aws_ssm_parameter" "twitch_bot_oauth_token" {
-  name  = "/botwitch/bot_oauth_token"
+  name  = "/bottwitch/bot_oauth_token"
   type  = "SecureString"
   value = var.twitch_bot_oauth_token
 }
 
 resource "aws_ssm_parameter" "twitch_bot_refresh_token" {
-  name  = "/botwitch/bot_refresh_token"
+  name  = "/bottwitch/bot_refresh_token"
   type  = "SecureString"
   value = var.twitch_bot_refresh_token
 }
 
 resource "aws_ssm_parameter" "twitch_client_id" {
-  name  = "/botwitch/client_id"
+  name  = "/bottwitch/client_id"
   type  = "String"
   value = var.twitch_client_id
 }
 
 resource "aws_ssm_parameter" "twitch_client_secret" {
-  name  = "/botwitch/client_secret"
+  name  = "/bottwitch/client_secret"
   type  = "SecureString"
   value = var.twitch_client_secret
 }
 
 resource "aws_ssm_parameter" "twitch_bot_access_token" {
-  name  = "/botwitch/bot_access_token"
+  name  = "/bottwitch/bot_access_token"
   type  = "SecureString"
   value = var.twitch_bot_access_token
 }
 
 resource "aws_ssm_parameter" "twitch_channel_name" {
-  name  = "/botwitch/channel_name"
+  name  = "/bottwitch/channel_name"
   type  = "String"
   value = var.twitch_channel_name
 }
 
 resource "aws_ssm_parameter" "twitch_channel_id" {
-  name  = "/botwitch/channel_id"
+  name  = "/bottwitch/channel_id"
   type  = "String"
   value = var.twitch_channel_id
 }

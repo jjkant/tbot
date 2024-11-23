@@ -33,12 +33,12 @@ This project provides a Twitch Chat Bot with the following features:
 
 Ensure the following parameters are available in AWS Parameter Store:
 
-- `/twitch/bot_oauth_token`: Twitch bot OAuth token.
-- `/twitch/client_id`: Twitch application client ID.
-- `/botwitch/client_secret`: Twitch application client secret.
-- `/botwitch/bot_access_token`: Access token for the bot.
-- `/botwitch/channel_name`: Twitch channel name.
-- `/botwitch/channel_id`: Twitch channel ID.
+- `/bottwitch/bot_oauth_token`: Twitch bot OAuth token.
+- `/bottwitch/client_id`: Twitch application client ID.
+- `/bottwitch/client_secret`: Twitch application client secret.
+- `/bottwitch/bot_access_token`: Access token for the bot.
+- `/bottwitch/channel_name`: Twitch channel name.
+- `/bottwitch/channel_id`: Twitch channel ID.
 - `/botmongodb/connection_string`: MongoDB Atlas connection string.
 - `/botaws/input_queue_url`: SQS input queue URL.
 - `/botaws/output_queue_url`: SQS output queue URL.
