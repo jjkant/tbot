@@ -11,7 +11,7 @@ def get_parameters():
         Names=[
             '/botaws/sqs/input_queue_url',
             '/botaws/sqs/output_queue_url',
-            '/mongodb/connection_string'
+            '/botmongodb/connection_string'
         ],
         WithDecryption=True
     )
@@ -23,7 +23,7 @@ sqs = boto3.client('sqs', region_name='eu-west-1')
 input_queue_url = params['/botaws/sqs/input_queue_url']
 output_queue_url = params['/botaws/sqs/output_queue_url']
 
-mongo_client = MongoClient(params['/mongodb/connection_string'])
+mongo_client = MongoClient(params['/botmongodb/connection_string'])
 db = mongo_client['twitch_bot']
 allowed_users_collection = db['allowed_users']
 
