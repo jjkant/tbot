@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  message_poller:
+    build:
+      context: ./message_poller
+    container_name: message_poller
+    restart: always
+    logging:
+      driver: awslogs
+      options:
+        awslogs-group: twitch-bot-logs
+        awslogs-region: eu-west-1
+        awslogs-stream: message_poller
+
+  eligibility_processor:
+    build:
+      context: ./eligibility_processor
+    container_name: eligibility_processor
+    restart: always
+    logging:
+      driver: awslogs
+      options:
+        awslogs-group: twitch-bot-logs
+        awslogs-region: eu-west-1
+        awslogs-stream: eligibility_processor
+
+  action_handler:
+    build:
+      context: ./action_handler
+    container_name: action_handler
+    restart: always
+    logging:
+      driver: awslogs
+      options:
+        awslogs-group: twitch-bot-logs
+        awslogs-region: eu-west-1
+        awslogs-stream: action_handler
