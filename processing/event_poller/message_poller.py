@@ -1,4 +1,4 @@
-# message_poller.py
+# event_poller.py
 
 import os
 import asyncio

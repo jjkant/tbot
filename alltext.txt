@@ -456,17 +456,17 @@ CMD ["python", "action_handler.py"]
 version: '3.3'
 
 services:
-  message_poller:
+  event_poller:
     build:
-      context: ./message_poller
-    container_name: message_poller
+      context: ./event_poller
+    container_name: event_poller
     restart: always
     logging:
       driver: awslogs
       options:
         awslogs-group: twitch-bot-logs
         awslogs-region: eu-west-1
-        awslogs-stream: message_poller
+        awslogs-stream: event_poller
 
   eligibility_processor:
     build:
@@ -576,13 +576,13 @@ FROM python:3.9-slim
 
 WORKDIR /app
 
-COPY message_poller.py /app
+COPY event_poller.py /app
 COPY requirements.txt /app
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-CMD ["python", "message_poller.py"]
-# message_poller.py
+CMD ["python", "event_poller.py"]
+# event_poller.py
 
 import os
 import asyncio
