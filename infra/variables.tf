@@ -1,3 +1,20 @@
+variable "aws_region" {
+  description = "AWS Region to deploy resources"
+  type        = string
+  default     = "eu-west-1"
+}
+
+variable "aws_access_key" {
+  description = "AWS Access Key for authentication"
+  type        = string
+  sensitive   = true
+}
+
+variable "aws_secret_key" {
+  description = "AWS Secret Key for authentication"
+  type        = string
+  sensitive   = true
+}
 
 variable "twitch_bot_oauth_token" {
   description = "OAuth token for the Twitch bot."

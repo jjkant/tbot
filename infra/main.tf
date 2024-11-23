@@ -1,51 +1,48 @@
 
 provider "aws" {
-  region  = "eu-west-1"
-  access_key = "AKIAVRUVSY4BW635BAV3"
-  secret_key = "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"
+  region     = var.aws_region
+  access_key = var.aws_access_key
+  secret_key = var.aws_secret_key
 }
 
-
-# 1. AWS SSM Parameter Store Parameters
-
 resource "aws_ssm_parameter" "twitch_bot_oauth_token" {
-  name  = "/twitch/bot_oauth_token"
+  name  = "/botwitch/bot_oauth_token"
   type  = "SecureString"
   value = var.twitch_bot_oauth_token
 }
 
 resource "aws_ssm_parameter" "twitch_bot_refresh_token" {
-  name  = "/twitch/bot_refresh_token"
+  name  = "/botwitch/bot_refresh_token"
   type  = "SecureString"
   value = var.twitch_bot_refresh_token
 }
 
 resource "aws_ssm_parameter" "twitch_client_id" {
-  name  = "/twitch/client_id"
+  name  = "/botwitch/client_id"
   type  = "String"
   value = var.twitch_client_id
 }
 
 resource "aws_ssm_parameter" "twitch_client_secret" {
-  name  = "/twitch/client_secret"
+  name  = "/botwitch/client_secret"
   type  = "SecureString"
   value = var.twitch_client_secret
 }
 
 resource "aws_ssm_parameter" "twitch_bot_access_token" {
-  name  = "/twitch/bot_access_token"
+  name  = "/botwitch/bot_access_token"
   type  = "SecureString"
   value = var.twitch_bot_access_token
 }
 
 resource "aws_ssm_parameter" "twitch_channel_name" {
-  name  = "/twitch/channel_name"
+  name  = "/botwitch/channel_name"
   type  = "String"
   value = var.twitch_channel_name
 }
 
 resource "aws_ssm_parameter" "twitch_channel_id" {
-  name  = "/twitch/channel_id"
+  name  = "/botwitch/channel_id"
   type  = "String"
   value = var.twitch_channel_id
 }
@@ -71,13 +68,13 @@ resource "aws_sqs_queue" "output_queue" {
 # SSM Parameters for SQS Queue URLs
 
 resource "aws_ssm_parameter" "sqs_input_queue_url" {
-  name  = "/aws/sqs/input_queue_url"
+  name  = "/botaws/sqsinput_queue_url"
   type  = "String"
   value = aws_sqs_queue.input_queue.id
 }
 
 resource "aws_ssm_parameter" "sqs_output_queue_url" {
-  name  = "/aws/sqs/output_queue_url"
+  name  = "/botaws/sqsoutput_queue_url"
   type  = "String"
   value = aws_sqs_queue.output_queue.id
 }
@@ -127,7 +124,11 @@ resource "aws_iam_policy" "ec2_policy" {
           "ssm:*",
           "logs:*",
           "ecr:*",
-          "secretsmanager:GetSecretValue"  # If using Secrets Manager
+          "secretsmanager:GetSecretValue",
+          "ec2:DescribeVpcs",
+          "ec2:DescribeSubnets",
+          "ec2:DescribeImages",
+          "ec2:DescribeRouteTables"
         ],
         Effect   = "Allow",
         Resource = "*"
@@ -172,7 +173,7 @@ data "aws_vpc" "default" {
 resource "aws_instance" "twitch_bot_ec2" {
   ami                         = data.aws_ami.ubuntu.id
   instance_type               = "t3.micro"
-  subnet_id                   = data.aws_subnet_ids.default.ids[0]
+  subnet_id                   = data.aws_subnets.default.ids[0]  # Use the first subnet
   associate_public_ip_address = true
   key_name                    = var.key_pair_name
   iam_instance_profile        = aws_iam_instance_profile.ec2_instance_profile.name
@@ -195,6 +196,9 @@ data "aws_ami" "ubuntu" {
   }
 }
 
-data "aws_subnet_ids" "default" {
-  vpc_id = data.aws_vpc.default.id
+data "aws_subnets" "default" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.default.id]
+  }
 }

@@ -1,2 +1,4 @@
 *.csv
-*.tfvars
+/infra/terraform.tfvars
+infra/.terraform/
+/infra/terraform.tfstate*
