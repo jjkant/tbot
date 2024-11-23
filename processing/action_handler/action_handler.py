@@ -11,11 +11,11 @@ def get_parameters():
     ssm = boto3.client('ssm', region_name='eu-west-1')
     params = ssm.get_parameters(
         Names=[
-            '/aws/sqs/output_queue_url',
+            '/botaws/sqs/output_queue_url',
             '/twitch/client_id',
-            '/twitch/client_secret',
+            '/botwitch/client_secret',
             '/twitch/bot_refresh_token',
-            '/twitch/channel_id'
+            '/botwitch/channel_id'
         ],
         WithDecryption=True
     )
@@ -24,11 +24,11 @@ def get_parameters():
 params = get_parameters()
 
 sqs = boto3.client('sqs', region_name='eu-west-1')
-output_queue_url = params['/aws/sqs/output_queue_url']
+output_queue_url = params['/botaws/sqs/output_queue_url']
 
 client_id = params['/twitch/client_id']
-client_secret = params['/twitch/client_secret']
-channel_id = params['/twitch/channel_id']
+client_secret = params['/botwitch/client_secret']
+channel_id = params['/botwitch/channel_id']
 bot_refresh_token = params['/twitch/bot_refresh_token']
 
 # Refresh the access token

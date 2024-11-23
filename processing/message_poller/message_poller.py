@@ -12,8 +12,8 @@ def get_parameters():
         Names=[
             '/twitch/bot_oauth_token',
             '/twitch/client_id',
-            '/twitch/channel_name',
-            '/aws/sqs/input_queue_url'
+            '/botwitch/channel_name',
+            '/botaws/sqs/input_queue_url'
         ],
         WithDecryption=True
     )
@@ -22,7 +22,7 @@ def get_parameters():
 params = get_parameters()
 
 sqs = boto3.client('sqs', region_name='eu-west-1')
-queue_url = params['/aws/sqs/input_queue_url']
+queue_url = params['/botaws/sqs/input_queue_url']
 
 class TwitchBot(commands.Bot):
 
@@ -32,7 +32,7 @@ class TwitchBot(commands.Bot):
             client_id=params['/twitch/client_id'],
             nick='YourBotNick',
             prefix='!',
-            initial_channels=[params['/twitch/channel_name']]
+            initial_channels=[params['/botwitch/channel_name']]
         )
 
     async def event_ready(self):

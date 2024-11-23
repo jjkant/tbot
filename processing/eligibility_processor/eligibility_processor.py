@@ -9,8 +9,8 @@ def get_parameters():
     ssm = boto3.client('ssm', region_name='eu-west-1')
     params = ssm.get_parameters(
         Names=[
-            '/aws/sqs/input_queue_url',
-            '/aws/sqs/output_queue_url',
+            '/botaws/sqs/input_queue_url',
+            '/botaws/sqs/output_queue_url',
             '/mongodb/connection_string'
         ],
         WithDecryption=True
@@ -20,8 +20,8 @@ def get_parameters():
 params = get_parameters()
 
 sqs = boto3.client('sqs', region_name='eu-west-1')
-input_queue_url = params['/aws/sqs/input_queue_url']
-output_queue_url = params['/aws/sqs/output_queue_url']
+input_queue_url = params['/botaws/sqs/input_queue_url']
+output_queue_url = params['/botaws/sqs/output_queue_url']
 
 mongo_client = MongoClient(params['/mongodb/connection_string'])
 db = mongo_client['twitch_bot']

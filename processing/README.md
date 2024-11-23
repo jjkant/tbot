@@ -35,13 +35,13 @@ Ensure the following parameters are available in AWS Parameter Store:
 
 - `/twitch/bot_oauth_token`: Twitch bot OAuth token.
 - `/twitch/client_id`: Twitch application client ID.
-- `/twitch/client_secret`: Twitch application client secret.
-- `/twitch/bot_access_token`: Access token for the bot.
-- `/twitch/channel_name`: Twitch channel name.
-- `/twitch/channel_id`: Twitch channel ID.
+- `/botwitch/client_secret`: Twitch application client secret.
+- `/botwitch/bot_access_token`: Access token for the bot.
+- `/botwitch/channel_name`: Twitch channel name.
+- `/botwitch/channel_id`: Twitch channel ID.
 - `/mongodb/connection_string`: MongoDB Atlas connection string.
-- `/aws/sqs/input_queue_url`: SQS input queue URL.
-- `/aws/sqs/output_queue_url`: SQS output queue URL.
+- `/botaws/sqs/input_queue_url`: SQS input queue URL.
+- `/botaws/sqs/output_queue_url`: SQS output queue URL.
 
 ## Usage
 
