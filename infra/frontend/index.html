@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Twitch Bot Authorization</title>
+</head>
+<body>
+  <h1>Authorize Your Twitch Bot</h1>
+  <p>Enter your Twitch Client ID and Client Secret below:</p>
+  <form id="auth-form">
+    <label for="client-id">Client ID:</label><br>
+    <input type="text" id="client-id" name="client-id" required><br><br>
+    <label for="client-secret">Client Secret:</label><br>
+    <input type="password" id="client-secret" name="client-secret" required><br><br>
+    <button type="submit">Authorize</button>
+  </form>
+
+  <script>
+    document.getElementById("auth-form").addEventListener("submit", (event) => {
+      event.preventDefault();
+
+      const clientId = document.getElementById("client-id").value;
+      const clientSecret = document.getElementById("client-secret").value;
+      const currentUrl = window.location.href;
+      const redirectUri = currentUrl.replace("index.html", "auth_callback.html");
+      const scopes = [
+        "chat:read",
+        "chat:edit",
+        "whispers:read",
+        "whispers:edit",
+        "moderator:manage:banned_users"
+      ].join(" ");
+
+      // Store client ID and client secret in session storage
+      sessionStorage.setItem("twitch_client_id", clientId);
+      sessionStorage.setItem("twitch_client_secret", clientSecret);
+
+      const authUrl = `https://id.twitch.tv/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(
+        redirectUri
+      )}&response_type=code&scope=${encodeURIComponent(scopes)}`;
+
+      window.location.href = authUrl;
+    });
+  </script>
+</body>
+</html>

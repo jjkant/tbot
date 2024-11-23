@@ -5,29 +5,33 @@ import boto3
 import json
 from pymongo import MongoClient
 
-def get_parameters():
+def get_ssm_parameters():
     ssm = boto3.client('ssm', region_name='eu-west-1')
-    params = ssm.get_parameters(
-        Names=[
-            '/botaws/input_queue_url',
-            '/botaws/output_queue_url',
-            '/botmongodb/connection_string'
-        ],
+    parameter_names = [
+        '/botaws/input_queue_url',
+        '/botaws/output_queue_url',
+        '/botmongodb/connection_string'
+    ]
+    response = ssm.get_parameters(
+        Names=parameter_names,
         WithDecryption=True
     )
-    return {param['Name']: param['Value'] for param in params['Parameters']}
+    params = {param['Name']: param['Value'] for param in response['Parameters']}
+    return params
 
-params = get_parameters()
+def main():
+    ssm_params = get_ssm_parameters()
+    input_queue_url = ssm_params['/botaws/input_queue_url']
+    output_queue_url = ssm_params['/botaws/output_queue_url']
+    mongo_connection_string = ssm_params['/botmongodb/connection_string']
 
-sqs = boto3.client('sqs', region_name='eu-west-1')
-input_queue_url = params['/botaws/input_queue_url']
-output_queue_url = params['/botaws/output_queue_url']
+    # Connect to MongoDB
+    mongo_client = MongoClient(mongo_connection_string)
+    db = mongo_client['twitch_bot']
+    allowed_users_collection = db['allowed_users']
 
-mongo_client = MongoClient(params['/botmongodb/connection_string'])
-db = mongo_client['twitch_bot']
-allowed_users_collection = db['allowed_users']
+    sqs = boto3.client('sqs', region_name='eu-west-1')
 
-def process_messages():
     while True:
         response = sqs.receive_message(
             QueueUrl=input_queue_url,
@@ -74,4 +78,4 @@ def process_messages():
             )
 
 if __name__ == '__main__':
-    process_messages()
+    main()

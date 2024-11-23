@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Authorization Callback</title>
+</head>
+<body>
+  <h1>Completing Authorization...</h1>
+  <p>Please wait while we complete the setup.</p>
+
+  <script>
+    (async () => {
+      const params = new URLSearchParams(window.location.search);
+      const authCode = params.get('code');
+
+      if (!authCode) {
+        document.body.innerHTML = "<p>Error: No authorization code found.</p>";
+        return;
+      }
+
+      const clientId = sessionStorage.getItem('twitch_client_id');
+      const clientSecret = sessionStorage.getItem('twitch_client_secret');
+
+      if (!clientId || !clientSecret) {
+        document.body.innerHTML = "<p>Error: Missing client credentials. Please restart the process.</p>";
+        return;
+      }
+
+      // Lambda Function URL provided by Terraform templating
+      const lambdaFunctionUrl = "{{LAMBDA_FUNCTION_URL}}";
+
+      try {
+        const response = await fetch(lambdaFunctionUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            client_id: clientId,
+            client_secret: clientSecret,
+            code: authCode
+          })
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+          document.body.innerHTML = "<p>Success: " + result.message + "</p>";
+        } else {
+          document.body.innerHTML = "<p>Error: " + result.error + "</p>";
+        }
+      } catch (error) {
+        document.body.innerHTML = "<p>Error: " + error.message + "</p>";
+      }
+    })();
+  </script>
+</body>
+</html>

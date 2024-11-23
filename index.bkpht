@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Twitch Token Generator</title>
+</head>
+<body>
+  <h1>Twitch Token Generator</h1>
+  <form id="twitch-form">
+    <label for="client-id">Client ID:</label><br>
+    <input type="text" id="client-id" name="client-id" required><br><br>
+
+    <label for="client-secret">Client Secret:</label><br>
+    <input type="text" id="client-secret" name="client-secret" required><br><br>
+
+    <button type="button" id="generate-tokens">Generate Tokens</button>
+  </form>
+
+  <h2>Generated Output</h2>
+  <pre id="output"></pre>
+
+  <script>
+    document.getElementById("generate-tokens").addEventListener("click", async function() {
+      const clientId = document.getElementById("client-id").value;
+      const clientSecret = document.getElementById("client-secret").value;
+
+      if (!clientId || !clientSecret) {
+        alert("Please provide both Client ID and Client Secret.");
+        return;
+      }
+
+      try {
+        // Step 1: Get an OAuth token
+        const tokenResponse = await fetch("https://id.twitch.tv/oauth2/token", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({
+            client_id: clientId,
+            client_secret: clientSecret,
+            grant_type: "client_credentials"
+          })
+        });
+
+        if (!tokenResponse.ok) {
+          throw new Error("Failed to get OAuth token: " + (await tokenResponse.text()));
+        }
+
+        const tokenData = await tokenResponse.json();
+        const accessToken = tokenData.access_token;
+
+        // Step 2: Validate the token and get user details
+        const validateResponse = await fetch("https://id.twitch.tv/oauth2/validate", {
+          headers: { Authorization: `Bearer ${accessToken}` }
+        });
+
+        if (!validateResponse.ok) {
+          throw new Error("Failed to validate token: " + (await validateResponse.text()));
+        }
+
+        const validateData = await validateResponse.json();
+
+        // Step 3: Generate Output
+        const output = `
+twitch_bot_oauth_token     = "${accessToken}"
+twitch_client_id           = "${clientId}"
+twitch_client_secret       = "${clientSecret}"
+twitch_bot_access_token    = "${accessToken}"
+twitch_bot_refresh_token   = "N/A (client_credentials grant doesn't provide refresh token)"
+twitch_channel_name        = "N/A (No user data available with client_credentials grant)"
+twitch_channel_id          = "N/A (No user data available with client_credentials grant)"
+        `;
+
+        document.getElementById("output").textContent = output;
+      } catch (error) {
+        document.getElementById("output").textContent = "Error: " + error.message;
+      }
+    });
+  </script>
+</body>
+</html>
