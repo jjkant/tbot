@@ -37,6 +37,7 @@ def process_messages():
         messages = response.get('Messages', [])
         for msg in messages:
             body = json.loads(msg['Body'])
+            event_type = body.get('event_type')
             username = body['username']
 
             # Check if user is allowed to chat using username
@@ -44,12 +45,21 @@ def process_messages():
             is_allowed = user_record is not None
 
             result = {
+                'event_type': event_type,
                 'username': username,
-                'message': body['message'],
-                'timestamp': body['timestamp'],
-                'message_id': body.get('message_id'),
                 'is_allowed': is_allowed
             }
+
+            if event_type == 'message':
+                result.update({
+                    'message': body['message'],
+                    'timestamp': body['timestamp'],
+                    'message_id': body.get('message_id')
+                })
+            elif event_type == 'join':
+                result.update({
+                    'timestamp': body['timestamp']
+                })
 
             # Send result to output queue
             sqs.send_message(

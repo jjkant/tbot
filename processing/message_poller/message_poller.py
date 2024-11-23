@@ -2,6 +2,7 @@
 
 import os
 import asyncio
+import datetime
 from twitchio.ext import commands
 import boto3
 import json
@@ -30,7 +31,7 @@ class TwitchBot(commands.Bot):
         super().__init__(
             token=params['/bottwitch/bot_oauth_token'],
             client_id=params['/bottwitch/client_id'],
-            nick='YourBotNick',
+            nick='Patr0l14',
             prefix='!',
             initial_channels=[params['/bottwitch/channel_name']]
         )
@@ -46,6 +47,7 @@ class TwitchBot(commands.Bot):
         message_id = message.tags.get('id')  # Message ID
 
         msg_data = {
+            'event_type': 'message',
             'username': message.author.name,
             'message': message.content,
             'timestamp': str(message.timestamp),
@@ -57,6 +59,24 @@ class TwitchBot(commands.Bot):
             QueueUrl=queue_url,
             MessageBody=json.dumps(msg_data)
         )
+
+    async def event_join(self, channel, user):
+        # This event triggers when a user joins the channel
+        if user.name.lower() == self.nick.lower():
+            return  # Ignore when the bot joins
+        msg_data = {
+            'event_type': 'join',
+            'username': user.name,
+            'user_data': user
+            'timestamp': datetime.datetime.utcnow().isoformat()
+        }
+        print(f"Msg to send ", json.dumps(msg_data))
+        # Send join event data to SQS
+        sqs.send_message(
+            QueueUrl=queue_url,
+            MessageBody=json.dumps(msg_data)
+        )
+        print(f"User {user.name} has joined the channel.")
 
 if __name__ == '__main__':
     bot = TwitchBot()

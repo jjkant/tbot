@@ -42,7 +42,6 @@ bot_access_token = new_tokens['access_token']
 bot_refresh_token = new_tokens['refresh_token']
 
 # Update the refresh token in SSM Parameter Store
-ssm = boto3.client('ssm', region_name='eu-west-1')
 ssm.put_parameter(
     Name='/bottwitch/bot_refresh_token',
     Value=bot_refresh_token,
@@ -60,7 +59,8 @@ twitch.set_user_authentication(
         AuthScope.MODERATOR_MANAGE_CHAT_MESSAGES,
         AuthScope.USER_MANAGE_WHISPERS,
         AuthScope.MODERATOR_READ_CHATTERS,
-        AuthScope.USER_READ_EMAIL
+        AuthScope.USER_READ_EMAIL,
+        AuthScope.MODERATOR_MANAGE_BANNED_USERS
     ],
     bot_refresh_token
 )
@@ -75,44 +75,49 @@ def handle_actions():
         messages = response.get('Messages', [])
         for msg in messages:
             body = json.loads(msg['Body'])
+            event_type = body.get('event_type')
             username = body['username']
             is_allowed = body['is_allowed']
-            message_id = body.get('message_id')
 
-            if not is_allowed:
-                try:
-                    # Get user_id from username
-                    users = twitch.get_users(logins=[username])
-                    user_data = users['data'][0] if users['data'] else None
-                    if user_data:
-                        user_id = user_data['id']
+            try:
+                # Get user_id from username
+                users = twitch.get_users(logins=[username])
+                user_data = users['data'][0] if users['data'] else None
+                if user_data:
+                    user_id = user_data['id']
+                else:
+                    print(f"User {username} not found.")
+                    continue
 
-                        # Delete the user's message
-                        if message_id:
-                            # If message_id is available, delete specific message
-                            twitch.delete_chat_messages(
-                                broadcaster_id=channel_id,
-                                moderator_id=channel_id,  # Assuming the bot is a moderator
-                                message_id=message_id
-                            )
-                        else:
-                            # Otherwise, delete all messages from user
-                            twitch.delete_chat_messages(
-                                broadcaster_id=channel_id,
-                                moderator_id=channel_id,
-                                user_id=user_id
-                            )
+                if not is_allowed:
+                    # Timeout user for 10 hours (36,000 seconds)
+                    try:
+                        twitch.ban_user(
+                            broadcaster_id=channel_id,
+                            moderator_id=channel_id,  # Assuming the bot is a moderator
+                            user_id=user_id,
+                            reason="You are not allowed to chat in this channel.",
+                            duration=36000  # 10 hours in seconds
+                        )
+                        print(f"User {username} has been timed out for 10 hours.")
+                    except Exception as e:
+                        print(f"Error timing out user {username}: {e}")
 
-                        # Send a whisper to the user
+                    # Send a whisper to the user
+                    try:
                         twitch.send_whisper(
                             from_user_id=channel_id,
                             to_user_id=user_id,
-                            message="Your message was deleted because you're not allowed to chat."
+                            message="You have been timed out for 10 hours because you're not allowed to chat."
                         )
-                    else:
-                        print(f"User {username} not found.")
-                except Exception as e:
-                    print(f"Error processing user {username}: {e}")
+                        print(f"Whisper sent to user {username}.")
+                    except Exception as e:
+                        print(f"Error sending whisper to user {username}: {e}")
+                else:
+                    # User is allowed; no action needed
+                    pass
+            except Exception as e:
+                print(f"Error processing user {username}: {e}")
 
             # Delete message from output queue
             sqs.delete_message(
