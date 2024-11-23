@@ -13,7 +13,7 @@ def get_parameters():
             '/twitch/bot_oauth_token',
             '/twitch/client_id',
             '/botwitch/channel_name',
-            '/botaws/sqs/input_queue_url'
+            '/botaws/input_queue_url'
         ],
         WithDecryption=True
     )
@@ -22,7 +22,7 @@ def get_parameters():
 params = get_parameters()
 
 sqs = boto3.client('sqs', region_name='eu-west-1')
-queue_url = params['/botaws/sqs/input_queue_url']
+queue_url = params['/botaws/input_queue_url']
 
 class TwitchBot(commands.Bot):
 

@@ -11,7 +11,7 @@ def get_parameters():
     ssm = boto3.client('ssm', region_name='eu-west-1')
     params = ssm.get_parameters(
         Names=[
-            '/botaws/sqs/output_queue_url',
+            '/botaws/output_queue_url',
             '/twitch/client_id',
             '/botwitch/client_secret',
             '/twitch/bot_refresh_token',
@@ -24,7 +24,7 @@ def get_parameters():
 params = get_parameters()
 
 sqs = boto3.client('sqs', region_name='eu-west-1')
-output_queue_url = params['/botaws/sqs/output_queue_url']
+output_queue_url = params['/botaws/output_queue_url']
 
 client_id = params['/twitch/client_id']
 client_secret = params['/botwitch/client_secret']

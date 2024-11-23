@@ -40,8 +40,8 @@ Ensure the following parameters are available in AWS Parameter Store:
 - `/botwitch/channel_name`: Twitch channel name.
 - `/botwitch/channel_id`: Twitch channel ID.
 - `/botmongodb/connection_string`: MongoDB Atlas connection string.
-- `/botaws/sqs/input_queue_url`: SQS input queue URL.
-- `/botaws/sqs/output_queue_url`: SQS output queue URL.
+- `/botaws/input_queue_url`: SQS input queue URL.
+- `/botaws/output_queue_url`: SQS output queue URL.
 
 ## Usage
 

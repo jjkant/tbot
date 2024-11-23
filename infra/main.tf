@@ -48,7 +48,7 @@ resource "aws_ssm_parameter" "twitch_channel_id" {
 }
 
 resource "aws_ssm_parameter" "mongodb_connection_string" {
-  name  = "/mongodb/connection_string"
+  name  = "/botmongodb/connection_string"
   type  = "SecureString"
   value = var.mongodb_connection_string
 }
@@ -68,13 +68,13 @@ resource "aws_sqs_queue" "output_queue" {
 # SSM Parameters for SQS Queue URLs
 
 resource "aws_ssm_parameter" "sqs_input_queue_url" {
-  name  = "/botaws/sqsinput_queue_url"
+  name  = "/botaws/input_queue_url"
   type  = "String"
   value = aws_sqs_queue.input_queue.id
 }
 
 resource "aws_ssm_parameter" "sqs_output_queue_url" {
-  name  = "/botaws/sqsoutput_queue_url"
+  name  = "/botaws/output_queue_url"
   type  = "String"
   value = aws_sqs_queue.output_queue.id
 }
