@@ -29,7 +29,10 @@
         "whispers:read",                  // To receive whisper messages
         "whispers:edit",                  // To send whisper messages
         "moderator:manage:banned_users",  // To ban/unban users
-        "moderator:read:chatters"         // To view the list of chatters
+        "moderator:read:chatters",        // To view the list of chatters
+        "moderator:manage:chat_messages", // To delete specific chat messages
+        "moderation:read",                // To read moderation activity in the channel
+        "channel:moderate"                // To perform moderation actions on the channel
       ].join(" ");
       // Store client ID and client secret in session storage
       sessionStorage.setItem("twitch_client_id", clientId);

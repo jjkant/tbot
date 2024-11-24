@@ -69,8 +69,8 @@ def refresh_token_if_needed(user_tokens, config_collection):
 async def fetch_channel_id(twitch, channel_name):
     """Fetch the channel ID for the given channel name."""
     async for user_info in twitch.get_users(logins=[channel_name]):
-        if user_info.get('data'):
-            return user_info['data'][0]['id']
+        if user_info:
+            return user_info.id
     raise Exception(f"Channel {channel_name} not found.")
 
 async def handle_user(twitch, channel_id, username, is_allowed):
@@ -111,7 +111,7 @@ async def main():
 
     # Initialize Twitch API client
     twitch = await Twitch(user_tokens['client_id'], user_tokens['client_secret'])
-    twitch.set_user_authentication(
+    await twitch.set_user_authentication(
         access_token,
         [
             AuthScope.MODERATOR_MANAGE_CHAT_MESSAGES,
