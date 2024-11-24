@@ -24,13 +24,13 @@
       const currentUrl = window.location.href;
       const redirectUri = currentUrl.replace("index.html", "auth_callback.html");
       const scopes = [
-        "chat:read",
-        "chat:edit",
-        "whispers:read",
-        "whispers:edit",
-        "moderator:manage:banned_users"
+        "chat:read",                      // To read chat messages
+        "chat:edit",                      // To send chat messages
+        "whispers:read",                  // To receive whisper messages
+        "whispers:edit",                  // To send whisper messages
+        "moderator:manage:banned_users",  // To ban/unban users
+        "moderator:read:chatters"         // To view the list of chatters
       ].join(" ");
-
       // Store client ID and client secret in session storage
       sessionStorage.setItem("twitch_client_id", clientId);
       sessionStorage.setItem("twitch_client_secret", clientSecret);

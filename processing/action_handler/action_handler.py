@@ -80,16 +80,16 @@ def main():
     twitch.set_user_authentication(
         access_token,
         [
+            AuthScope.MODERATOR_MANAGE_CHAT_MESSAGES,
+            AuthScope.MODERATOR_MANAGE_BANNED_USERS,
+            AuthScope.MODERATOR_READ_CHATTERS,
             AuthScope.CHAT_EDIT,
             AuthScope.CHAT_READ,
-            AuthScope.MODERATOR_MANAGE_CHAT_MESSAGES,
-            AuthScope.USER_MANAGE_WHISPERS,
-            AuthScope.MODERATOR_READ_CHATTERS,
-            AuthScope.USER_READ_EMAIL,
-            AuthScope.MODERATOR_MANAGE_BANNED_USERS
+            AuthScope.WHISPERS_EDIT
         ],
-        user_tokens['refresh_token']
+        refresh_token
     )
+
 
     channel_name = bot_config['channel_name']
     user_info = twitch.get_users(logins=[channel_name])
