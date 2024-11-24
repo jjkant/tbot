@@ -105,8 +105,8 @@ async def handle_user(twitch, channel_id, username, is_allowed):
     logger.info(f"Processing user: {username} with allowed status: {is_allowed}")
     try:
         async for user_data in twitch.get_users(logins=[username]):
-            if user_data.get('data'):
-                user_id = user_data['data'][0]['id']
+            if user_data:
+                user_id = user_data.id
                 if not is_allowed:
                     try:
                         # Timeout user for 10 hours
@@ -125,6 +125,7 @@ async def handle_user(twitch, channel_id, username, is_allowed):
                 logger.error(f"User {username} not found.")
     except Exception as e:
         logger.error(f"Error processing user {username}: {e}")
+
 
 async def main():
     """Main event loop."""
