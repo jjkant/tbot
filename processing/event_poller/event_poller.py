@@ -111,7 +111,6 @@ def main():
 
         async def event_ready(self):
             logger.info(f"Bot is ready. Logged in as {self.nick}")
-            await self.join_membership()  # Enable join/part events
 
         async def event_message(self, message):
             logger.info(f"Received message from {message.author.name}: {message.content}")
