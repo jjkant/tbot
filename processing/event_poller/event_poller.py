@@ -142,7 +142,6 @@ def main():
             msg_data = {
                 'event_type': 'join',
                 'username': user.name,
-                'user': user,
                 'timestamp': datetime.datetime.utcnow().isoformat()
             }
             logger.info(f"Sending join event to SQS: {json.dumps(msg_data)}")
