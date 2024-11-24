@@ -12,8 +12,8 @@ from pymongo import MongoClient
 def get_ssm_parameters():
     ssm = boto3.client('ssm', region_name='eu-west-1')
     parameter_names = [
-        '/botaws/output_queue_url',
-        '/botmongodb/connection_string'
+        '/patroliaaws/output_queue_url',
+        '/patroliamongodb/connection_string'
     ]
     response = ssm.get_parameters(
         Names=parameter_names,
@@ -25,7 +25,7 @@ def get_ssm_parameters():
 def get_mongo_config(mongo_connection_string):
     # Connect to MongoDB
     mongo_client = MongoClient(mongo_connection_string)
-    db = mongo_client['twitch_bot']
+    db = mongo_client['patrolia']
     config_collection = db['config']
     return config_collection
 
@@ -72,8 +72,8 @@ def refresh_token_if_needed(app_credentials, user_tokens, config_collection):
 
 def main():
     ssm_params = get_ssm_parameters()
-    output_queue_url = ssm_params['/botaws/output_queue_url']
-    mongo_connection_string = ssm_params['/botmongodb/connection_string']
+    output_queue_url = ssm_params['/patroliaaws/output_queue_url']
+    mongo_connection_string = ssm_params['/patroliamongodb/connection_string']
 
     config_collection = get_mongo_config(mongo_connection_string)
     app_credentials, user_tokens, bot_config = get_twitch_credentials(config_collection)

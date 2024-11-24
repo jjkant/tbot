@@ -15,7 +15,7 @@ output "sqs_queue_urls" {
 }
 
 output "ec2_public_ip" {
-  value = aws_instance.twitch_bot_ec2.public_ip
+  value = aws_instance.patrolia_ec2.public_ip
 }
 
 output "frontend_website_url" {

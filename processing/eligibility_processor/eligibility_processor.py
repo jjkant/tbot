@@ -8,9 +8,9 @@ from pymongo import MongoClient
 def get_ssm_parameters():
     ssm = boto3.client('ssm', region_name='eu-west-1')
     parameter_names = [
-        '/botaws/input_queue_url',
-        '/botaws/output_queue_url',
-        '/botmongodb/connection_string'
+        '/patroliaaws/input_queue_url',
+        '/patroliaaws/output_queue_url',
+        '/patroliamongodb/connection_string'
     ]
     response = ssm.get_parameters(
         Names=parameter_names,
@@ -21,13 +21,13 @@ def get_ssm_parameters():
 
 def main():
     ssm_params = get_ssm_parameters()
-    input_queue_url = ssm_params['/botaws/input_queue_url']
-    output_queue_url = ssm_params['/botaws/output_queue_url']
-    mongo_connection_string = ssm_params['/botmongodb/connection_string']
+    input_queue_url = ssm_params['/patroliaaws/input_queue_url']
+    output_queue_url = ssm_params['/patroliaaws/output_queue_url']
+    mongo_connection_string = ssm_params['/patroliamongodb/connection_string']
 
     # Connect to MongoDB
     mongo_client = MongoClient(mongo_connection_string)
-    db = mongo_client['twitch_bot']
+    db = mongo_client['patrolia']
     allowed_users_collection = db['allowed_users']
 
     sqs = boto3.client('sqs', region_name='eu-west-1')

@@ -9,7 +9,7 @@ services:
     logging:
       driver: awslogs
       options:
-        awslogs-group: twitch-bot-logs
+        awslogs-group: patrolia-logs
         awslogs-region: eu-west-1
         awslogs-stream: event_poller
 
@@ -21,7 +21,7 @@ services:
     logging:
       driver: awslogs
       options:
-        awslogs-group: twitch-bot-logs
+        awslogs-group: patrolia-logs
         awslogs-region: eu-west-1
         awslogs-stream: eligibility_processor
 
@@ -33,6 +33,6 @@ services:
     logging:
       driver: awslogs
       options:
-        awslogs-group: twitch-bot-logs
+        awslogs-group: patrolia-logs
         awslogs-region: eu-west-1
         awslogs-stream: action_handler

@@ -13,8 +13,8 @@ systemctl start docker
 systemctl enable docker
 
 # Clone the repository
-mkdir -p /home/ubuntu/twitch_bot
-cd /home/ubuntu/twitch_bot
+mkdir -p /home/ubuntu/patrolia
+cd /home/ubuntu/patrolia
 
 # Replace with your actual repository URL
 git clone https://github.com/jjkant/tbot.git . || { echo "Git clone failed"; exit 1; }
@@ -25,4 +25,4 @@ cd processing
 # Run Docker Compose
 docker-compose up -d || { echo "Docker Compose failed"; exit 1; }
 
-echo "Twitch bot setup completed successfully!"
+echo "Patrolia setup completed successfully!"

@@ -37,15 +37,15 @@ Environment Variables
 
 Ensure the following parameters are available in AWS Parameter Store:
 
--   `/bottwitch/bot_oauth_token`: Twitch bot OAuth token.
--   `/bottwitch/client_id`: Twitch application client ID.
--   `/bottwitch/client_secret`: Twitch application client secret.
--   `/bottwitch/bot_access_token`: Access token for the bot.
--   `/bottwitch/channel_name`: Twitch channel name.
--   `/bottwitch/channel_id`: Twitch channel ID.
--   `/botmongodb/connection_string`: MongoDB Atlas connection string.
--   `/botaws/input_queue_url`: SQS input queue URL.
--   `/botaws/output_queue_url`: SQS output queue URL.
+-   `/patroliatwitch/patrolia_oauth_token`: Patrolia OAuth token.
+-   `/patroliatwitch/client_id`: Twitch application client ID.
+-   `/patroliatwitch/client_secret`: Twitch application client secret.
+-   `/patroliatwitch/patrolia_access_token`: Access token for the bot.
+-   `/patroliatwitch/channel_name`: Twitch channel name.
+-   `/patroliatwitch/channel_id`: Twitch channel ID.
+-   `/patroliamongodb/connection_string`: MongoDB Atlas connection string.
+-   `/patroliaaws/input_queue_url`: SQS input queue URL.
+-   `/patroliaaws/output_queue_url`: SQS output queue URL.
 
 Usage
 -----

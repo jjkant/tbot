@@ -1,5 +1,3 @@
-# main.tf
-
 provider "aws" {
   region     = var.aws_region
   access_key = var.aws_access_key
@@ -8,7 +6,7 @@ provider "aws" {
 
 # 1. AWS SSM Parameters
 resource "aws_ssm_parameter" "mongodb_connection_string" {
-  name  = "/botmongodb/connection_string"
+  name  = "/patroliamongodb/connection_string"
   type  = "SecureString"
   value = var.mongodb_connection_string
 }
@@ -26,13 +24,13 @@ resource "aws_sqs_queue" "output_queue" {
 
 # SSM Parameters for SQS Queue URLs
 resource "aws_ssm_parameter" "sqs_input_queue_url" {
-  name  = "/botaws/input_queue_url"
+  name  = "/patroliaaws/input_queue_url"
   type  = "String"
   value = aws_sqs_queue.input_queue.id
 }
 
 resource "aws_ssm_parameter" "sqs_output_queue_url" {
-  name  = "/botaws/output_queue_url"
+  name  = "/patroliaaws/output_queue_url"
   type  = "String"
   value = aws_sqs_queue.output_queue.id
 }
@@ -41,7 +39,7 @@ resource "aws_ssm_parameter" "sqs_output_queue_url" {
 
 # EC2 Role
 resource "aws_iam_role" "ec2_role" {
-  name = "twitch_bot_ec2_role"
+  name = "patrolia_ec2_role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
@@ -56,7 +54,7 @@ resource "aws_iam_role" "ec2_role" {
 }
 
 resource "aws_iam_policy" "ec2_policy" {
-  name = "twitch_bot_ec2_policy"
+  name = "patrolia_ec2_policy"
 
   policy = jsonencode({
     Version = "2012-10-17",
@@ -93,7 +91,7 @@ resource "aws_iam_role_policy_attachment" "ec2_role_attach" {
 }
 
 resource "aws_iam_instance_profile" "ec2_instance_profile" {
-  name = "twitch_bot_instance_profile"
+  name = "patrolia_instance_profile"
   role = aws_iam_role.ec2_role.name
 }
 
@@ -153,8 +151,8 @@ data "aws_vpc" "default" {
 }
 
 resource "aws_security_group" "ec2_sg" {
-  name        = "twitch_bot_sg"
-  description = "Security group for Twitch Bot EC2 instance"
+  name        = "patrolia_sg"
+  description = "Security group for Patrolia EC2 instance"
   vpc_id      = data.aws_vpc.default.id
 
   ingress {
@@ -190,7 +188,7 @@ data "aws_subnets" "default" {
   }
 }
 
-resource "aws_instance" "twitch_bot_ec2" {
+resource "aws_instance" "patrolia_ec2" {
   ami                         = data.aws_ami.ubuntu.id
   instance_type               = "t3.micro"
   subnet_id                   = data.aws_subnets.default.ids[0]  # Use the first subnet
@@ -202,7 +200,7 @@ resource "aws_instance" "twitch_bot_ec2" {
   user_data = file("user_data.sh")
 
   tags = {
-    Name = "TwitchBotEC2"
+    Name = "PatroliaEC2"
   }
 }
 
@@ -223,11 +221,11 @@ resource "aws_s3_bucket" "frontend_bucket" {
 
 resource "aws_s3_bucket_ownership_controls" "frontend_bucket_ownership_controls" {
   bucket = aws_s3_bucket.frontend_bucket.id
+
   rule {
     object_ownership = "BucketOwnerPreferred"
   }
 }
-
 
 resource "aws_s3_bucket_public_access_block" "frontend_bucket_public_access_block" {
   bucket = aws_s3_bucket.frontend_bucket.id
@@ -236,10 +234,13 @@ resource "aws_s3_bucket_public_access_block" "frontend_bucket_public_access_bloc
   block_public_policy     = false
   ignore_public_acls      = false
   restrict_public_buckets = false
+
+  depends_on = [aws_s3_bucket.frontend_bucket]
 }
 
 resource "aws_s3_bucket_acl" "frontend_bucket_acl" {
   depends_on = [
+    aws_s3_bucket.frontend_bucket,
     aws_s3_bucket_ownership_controls.frontend_bucket_ownership_controls,
     aws_s3_bucket_public_access_block.frontend_bucket_public_access_block,
   ]
@@ -248,7 +249,6 @@ resource "aws_s3_bucket_acl" "frontend_bucket_acl" {
   acl    = "public-read"
 }
 
-
 # S3 Bucket Website Configuration
 resource "aws_s3_bucket_website_configuration" "frontend_website" {
   bucket = aws_s3_bucket.frontend_bucket.id
@@ -256,6 +256,8 @@ resource "aws_s3_bucket_website_configuration" "frontend_website" {
   index_document {
     suffix = "index.html"
   }
+
+  depends_on = [aws_s3_bucket_acl.frontend_bucket_acl]
 }
 
 # S3 Bucket Policy to Allow Public Read Access
@@ -274,8 +276,12 @@ resource "aws_s3_bucket_policy" "frontend_bucket_policy" {
       }
     ]
   })
-}
 
+  depends_on = [
+    aws_s3_bucket_acl.frontend_bucket_acl,
+    aws_s3_bucket_website_configuration.frontend_website
+  ]
+}
 
 # 8. S3 Bucket Objects for Frontend
 
@@ -285,6 +291,8 @@ resource "aws_s3_object" "index_html" {
   key          = "index.html"
   source       = "${path.module}/frontend/index.html"
   content_type = "text/html"
+
+  depends_on = [aws_s3_bucket_policy.frontend_bucket_policy]
 }
 
 # Upload auth_callback.html with templating
@@ -295,11 +303,13 @@ resource "aws_s3_object" "auth_callback_html" {
     LAMBDA_FUNCTION_URL = aws_lambda_function_url.oauth_handler_url.function_url
   })
   content_type = "text/html"
+
+  depends_on = [aws_s3_bucket_policy.frontend_bucket_policy]
 }
 
 # 9. Lambda Function
 resource "aws_lambda_function" "oauth_handler" {
-  filename         = "lambda_package.zip"  # The deployment package
+  filename         = "lambda_function.zip"  # The deployment package
   function_name    = "${var.project_name}_oauth_handler"
   role             = aws_iam_role.lambda_role.arn
   handler          = "lambda_function.lambda_handler"
@@ -315,11 +325,10 @@ resource "aws_lambda_function" "oauth_handler" {
   environment {
     variables = {
       MONGODB_CONNECTION_STRING = var.mongodb_connection_string
-      # No need for FRONTEND_CALLBACK_URL since we're not using it
+      FRONTEND_CALLBACK_URL     = "https://patrolia-frontend-${random_id.bucket_suffix.hex}.s3.${var.aws_region}.amazonaws.com/auth_callback.html"
     }
   }
 }
-
 
 # Lambda Function URL
 resource "aws_lambda_function_url" "oauth_handler_url" {
@@ -328,8 +337,9 @@ resource "aws_lambda_function_url" "oauth_handler_url" {
 
   cors {
     allow_methods = ["POST"]
-    allow_origins = ["*"]
+    allow_origins = ["https://patrolia-frontend-${random_id.bucket_suffix.hex}.s3.${var.aws_region}.amazonaws.com"]
+    allow_headers = ["Content-Type", "Authorization", "X-Amz-Date", "X-Api-Key", "X-Amz-Security-Token"]
+    expose_headers = ["Content-Type", "Authorization"]
+    max_age        = 3600
   }
 }
-
-

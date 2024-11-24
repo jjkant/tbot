@@ -13,8 +13,8 @@ from twitchAPI.oauth import refresh_access_token
 def get_ssm_parameters():
     ssm = boto3.client('ssm', region_name='eu-west-1')
     parameter_names = [
-        '/botaws/input_queue_url',
-        '/botmongodb/connection_string'
+        '/patroliaaws/input_queue_url',
+        '/patroliamongodb/connection_string'
     ]
     response = ssm.get_parameters(
         Names=parameter_names,
@@ -26,7 +26,7 @@ def get_ssm_parameters():
 def get_mongo_config(mongo_connection_string):
     # Connect to MongoDB
     mongo_client = MongoClient(mongo_connection_string)
-    db = mongo_client['twitch_bot']
+    db = mongo_client['patrolia']
     config_collection = db['config']
     return config_collection
 
@@ -73,15 +73,15 @@ def refresh_token_if_needed(app_credentials, user_tokens, config_collection):
 
 def main():
     ssm_params = get_ssm_parameters()
-    input_queue_url = ssm_params['/botaws/input_queue_url']
-    mongo_connection_string = ssm_params['/botmongodb/connection_string']
+    input_queue_url = ssm_params['/patroliaaws/input_queue_url']
+    mongo_connection_string = ssm_params['/patroliamongodb/connection_string']
 
     config_collection = get_mongo_config(mongo_connection_string)
     app_credentials, user_tokens, bot_config = get_twitch_credentials(config_collection)
     access_token = refresh_token_if_needed(app_credentials, user_tokens, config_collection)
 
     # Initialize the bot
-    class TwitchBot(commands.Bot):
+    class Patrolia(commands.Bot):
 
         def __init__(self):
             super().__init__(
@@ -134,7 +134,7 @@ def main():
             )
             print(f"User {user.name} has joined the channel.")
 
-    bot = TwitchBot()
+    bot = Patrolia()
     bot.run()
 
 if __name__ == '__main__':
