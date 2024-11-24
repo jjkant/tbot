@@ -36,13 +36,8 @@ def get_ssm_parameters():
         logger.error(f"Error fetching SSM parameters: {e}")
         raise
 
-def get_twitch_credentials(mongo_connection_string):
+def get_twitch_credentials(config_collection):
     """Fetch Twitch credentials and bot configuration from MongoDB."""
-    logger.info("Connecting to MongoDB...")
-    mongo_client = MongoClient(mongo_connection_string)
-    db = mongo_client['patrolia']
-    config_collection = db['config']
-
     user_tokens = config_collection.find_one({'_id': 'twitch_user_tokens'})
     if not user_tokens:
         logger.error("Twitch user tokens not found in MongoDB.")
@@ -139,7 +134,12 @@ async def main():
         output_queue_url = ssm_params['/patroliaaws/output_queue_url']
         mongo_connection_string = ssm_params['/patroliamongodb/connection_string']
 
-        user_tokens, bot_config = get_twitch_credentials(mongo_connection_string)
+        logger.info("Connecting to MongoDB...")
+        mongo_client = MongoClient(mongo_connection_string)
+        db = mongo_client['patrolia']
+        config_collection = db['config']
+
+        user_tokens, bot_config = get_twitch_credentials(config_collection)
         access_token = refresh_token_if_needed(user_tokens, config_collection)
 
         # Initialize Twitch API client
