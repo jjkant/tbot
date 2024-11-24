@@ -111,6 +111,7 @@ def main():
 
         async def event_ready(self):
             logger.info(f"Bot is ready. Logged in as {self.nick}")
+            await self.join_membership()  # Enable join/part events
 
         async def event_message(self, message):
             logger.info(f"Received message from {message.author.name}: {message.content}")
@@ -142,9 +143,10 @@ def main():
             msg_data = {
                 'event_type': 'join',
                 'username': user.name,
+                'user': user,
                 'timestamp': datetime.datetime.utcnow().isoformat()
             }
-            logger.info(f"Sending join event to SQS: {msg_data}")
+            logger.info(f"Sending join event to SQS: {json.dumps(msg_data)}")
             self.sqs.send_message(
                 QueueUrl=self.queue_url,
                 MessageBody=json.dumps(msg_data)
