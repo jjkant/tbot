@@ -35,6 +35,48 @@ def get_ssm_parameters():
     except Exception as e:
         logger.error(f"Error fetching SSM parameters: {e}")
         raise
+    
+async def schedule_token_refresh(user_tokens, config_collection, twitch):
+    """Schedule token renewal just before it expires."""
+    try:
+        # Calculate the delay until the token needs to be refreshed
+        current_time = int(time.time())
+        token_age = current_time - user_tokens['obtained_at']
+        delay = max(0, user_tokens['expires_in'] - token_age - 300)  # Refresh 5 minutes early
+
+        logger.info(f"Scheduling token refresh in {delay} seconds...")
+        await asyncio.sleep(delay)
+
+        # Refresh the token
+        logger.info("Refreshing access token...")
+        new_tokens = refresh_access_token(
+            user_tokens['refresh_token'],
+            user_tokens['client_id'],
+            user_tokens['client_secret']
+        )
+        update_user_tokens(config_collection, new_tokens)
+        user_tokens.update(new_tokens)
+        logger.info("Access token refreshed successfully.")
+
+        # Update Twitch authentication
+        await twitch.set_user_authentication(
+            new_tokens['access_token'],
+            [
+                AuthScope.MODERATOR_MANAGE_CHAT_MESSAGES,
+                AuthScope.MODERATOR_MANAGE_BANNED_USERS,
+                AuthScope.MODERATOR_READ_CHATTERS,
+                AuthScope.CHAT_EDIT,
+                AuthScope.CHAT_READ,
+                AuthScope.WHISPERS_EDIT
+            ],
+            new_tokens['refresh_token']
+        )
+
+        # Schedule the next refresh
+        asyncio.create_task(schedule_token_refresh(user_tokens, config_collection, twitch))
+
+    except Exception as e:
+        logger.error(f"Error scheduling token refresh: {e}")
 
 def get_twitch_credentials(config_collection):
     """Fetch Twitch credentials and bot configuration from MongoDB."""
@@ -157,6 +199,7 @@ async def main():
             ],
             user_tokens['refresh_token']
         )
+        asyncio.create_task(schedule_token_refresh(user_tokens, config_collection, twitch))
 
         # Fetch channel ID
         channel_name = bot_config['channel_name']
